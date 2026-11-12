@@ -32,7 +32,7 @@ SERIAL_PORTS = []            # [] = every USB serial device; or e.g. ["COM5", "C
 BAUD = 115200
 
 UDP_PORT = 4210              # must match PC_UDP_PORT in the sketch
-ESP_HOST = "painel.local"    # or the IP shown on the dashboard's "Sistema" page, e.g. "192.168.1.80"
+ESP_HOST = "painel.local"    # or the IP shown on the dashboard's "System" page, e.g. "192.168.1.80"
 
 LHM_URL = "http://localhost:8085/data.json"
 
@@ -74,16 +74,16 @@ def refresh_ports():
             ser.open()
             ports[name] = ser
             port_errors.pop(name, None)
-            log(f"USB: {name} aberta")
+            log(f"USB: {name} opened")
         except Exception as e:
             text = str(e)
             if "PermissionError" in text or "denied" in text.lower() or "negado" in text.lower():
-                reason = "ocupada por outro programa (Arduino IDE / Serial Monitor / bridge antigo?)"
+                reason = "in use by another program (Arduino IDE / Serial Monitor / old bridge?)"
             else:
                 reason = text
             if port_errors.get(name) != reason:
                 port_errors[name] = reason
-                log(f"USB: {name} nao abriu - {reason}")
+                log(f"USB: {name} did not open - {reason}")
 
 def send_serial(data):
     for name, ser in list(ports.items()):
@@ -91,7 +91,7 @@ def send_serial(data):
             ser.write(data)
             ser.reset_input_buffer()   # discard the board's debug output
         except Exception:
-            log(f"USB: {name} perdida")
+            log(f"USB: {name} lost")
             try:
                 ser.close()
             except Exception:
@@ -122,7 +122,7 @@ def refresh_udp():
             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             s.bind((ip, 0))
             udp_socks[ip] = s
-            log(f"Rede: a difundir a partir de {ip}")
+            log(f"Network: broadcasting from {ip}")
         except OSError:
             pass
 
@@ -148,7 +148,7 @@ def resolve_loop():
             ip = None
         if ip != esp_ip:
             esp_ip = ip
-            log(f"Rede: ESP32 encontrado em {ip}" if ip else f"Rede: {ESP_HOST} nao encontrado (so difusao)")
+            log(f"Network: ESP32 found at {ip}" if ip else f"Network: {ESP_HOST} not found (broadcast only)")
         time.sleep(30)
 
 
@@ -221,14 +221,14 @@ def fetch_claude():
         data = json.load(f)
     token = data.get("accessToken") or data.get("token") or (data.get("claudeAiOauth") or {}).get("accessToken")
     if not token:
-        raise ValueError("token nao encontrado em .credentials.json")
+        raise ValueError("token not found in .credentials.json")
 
     r = requests.get("https://api.anthropic.com/api/oauth/usage", timeout=15, headers={
         "Authorization": f"Bearer {token}",
         "anthropic-beta": "oauth-2025-04-20",
     })
     if r.status_code == 401:
-        raise RuntimeError("token expirado (abre o Claude Code para o renovar)")
+        raise RuntimeError("token expired (open Claude Code to renew it)")
     r.raise_for_status()
     d = r.json()
     five, seven = d.get("five_hour") or {}, d.get("seven_day") or {}
@@ -241,7 +241,7 @@ def fetch_codex():
     token = (data.get("accessToken") or data.get("personal_access_token")
              or (data.get("tokens") or {}).get("access_token"))
     if not token:
-        raise ValueError("token nao encontrado em auth.json")
+        raise ValueError("token not found in auth.json")
 
     r = requests.get("https://chatgpt.com/backend-api/wham/usage", timeout=15, headers={
         "Authorization": f"Bearer {token}",
@@ -249,7 +249,7 @@ def fetch_codex():
         "Content-Type": "application/json",
     })
     if r.status_code == 401:
-        raise RuntimeError("token expirado (abre o Codex para o renovar)")
+        raise RuntimeError("token expired (open Codex to renew it)")
     r.raise_for_status()
     rate = r.json().get("rate_limit") or {}
     primary, secondary = rate.get("primary_window") or {}, rate.get("secondary_window") or {}
@@ -278,7 +278,7 @@ def usage_loop():
             except Exception as e:
                 if usage_errors.get(prefix) != str(e):
                     usage_errors[prefix] = str(e)
-                    log(f"{name}: falhou - {e}")
+                    log(f"{name}: failed - {e}")
         time.sleep(USAGE_POLL_S)
 
 def usage_lines():
@@ -296,9 +296,9 @@ def usage_lines():
 
 # ---------------- main ----------------
 def main():
-    log("Painel bridge a arrancar (Ctrl+C para sair)")
+    log("Painel bridge starting (Ctrl+C to quit)")
     if serial is None:
-        log("USB: pyserial nao instalado (pip install pyserial) - so Wi-Fi")
+        log("USB: pyserial not installed (pip install pyserial) - Wi-Fi only")
     threading.Thread(target=usage_loop, daemon=True).start()
     threading.Thread(target=resolve_loop, daemon=True).start()
 
@@ -314,25 +314,25 @@ def main():
                 send(hardware_line())
                 if lhm_ok is not True:
                     lhm_ok = True
-                    log("PC: a enviar CPU/GPU/RAM")
+                    log("PC: sending CPU/GPU/RAM")
             except Exception as e:
                 if lhm_ok is not False:
                     lhm_ok = False
-                    log(f"PC: LibreHardwareMonitor nao responde em {LHM_URL} - {e}")
+                    log(f"PC: LibreHardwareMonitor is not responding at {LHM_URL} - {e}")
 
             if tick % USAGE_SEND_S == 0:
                 for line in usage_lines():
                     send(line)
 
             if tick % 60 == 59:
-                usb = ", ".join(ports) or "nenhuma"
-                net = ", ".join(udp_socks) or "nenhuma"
-                log(f"estado: USB [{usb}]  rede [{net}]  ESP32 [{esp_ip or 'so difusao'}]")
+                usb = ", ".join(ports) or "none"
+                net = ", ".join(udp_socks) or "none"
+                log(f"status: USB [{usb}]  network [{net}]  ESP32 [{esp_ip or 'broadcast only'}]")
 
             tick += 1
             time.sleep(1)
     except KeyboardInterrupt:
-        log("A sair...")
+        log("Exiting...")
     finally:
         for ser in ports.values():
             try:

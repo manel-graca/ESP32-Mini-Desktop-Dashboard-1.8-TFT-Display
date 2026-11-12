@@ -174,11 +174,11 @@ void drawCenteredWrapped(GFXcanvas16& g, const char* s, int16_t yMid, uint16_t c
   drawCentered(g, s + split + 1, yMid + 2, 1, color);
 }
 
-// ================= LOCALE (pt-PT) =================
-const char* const DAYS_SHORT[]   = {"DOM","SEG","TER","QUA","QUI","SEX","SÁB"};
-const char* const MONTHS_SHORT[] = {"JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"};
-const char* const MONTHS_FULL[]  = {"JANEIRO","FEVEREIRO","MARÇO","ABRIL","MAIO","JUNHO",
-                                    "JULHO","AGOSTO","SETEMBRO","OUTUBRO","NOVEMBRO","DEZEMBRO"};
+// ================= LOCALE =================
+const char* const DAYS_SHORT[]   = {"SUN","MON","TUE","WED","THU","FRI","SAT"};
+const char* const MONTHS_SHORT[] = {"JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"};
+const char* const MONTHS_FULL[]  = {"JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+                                    "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"};
 
 // ================= DATES / HOLIDAYS (Portugal) =================
 bool isLeap(int year) { return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0; }
@@ -215,22 +215,22 @@ struct FixedHoliday   { uint8_t mon, day; const char* name; };   // mon 1-12
 struct MovableHoliday { int8_t easterOffset; const char* name; };
 
 static const FixedHoliday FIXED_HOLIDAYS[] = {
-  { 1,  1, "Ano Novo"},
-  { 4, 25, "Dia da Liberdade"},
-  { 5,  1, "Dia do Trabalhador"},
-  { 6, 10, "Dia de Portugal"},
-  { 8, 15, "Assunção de Nossa Senhora"},
-  {10,  5, "Implantação da República"},
-  {11,  1, "Dia de Todos os Santos"},
-  {12,  1, "Restauração da Independência"},
-  {12,  8, "Imaculada Conceição"},
-  {12, 25, "Natal"},
+  { 1,  1, "New Year's Day"},
+  { 4, 25, "Freedom Day"},
+  { 5,  1, "Labour Day"},
+  { 6, 10, "Portugal Day"},
+  { 8, 15, "Assumption of Mary"},
+  {10,  5, "Republic Day"},
+  {11,  1, "All Saints' Day"},
+  {12,  1, "Restoration of Independence"},
+  {12,  8, "Immaculate Conception"},
+  {12, 25, "Christmas Day"},
 };
 
 static const MovableHoliday MOVABLE_HOLIDAYS[] = {
-  {-2, "Sexta-feira Santa"},
-  { 0, "Domingo de Páscoa"},
-  {60, "Corpo de Deus"},
+  {-2, "Good Friday"},
+  { 0, "Easter Sunday"},
+  {60, "Corpus Christi"},
 };
 
 // mon 0-11; returns nullptr if the day is not a holiday
@@ -333,7 +333,7 @@ struct Feed {
     }
     lastFailed = !ok;
     nextAt = millis() + (ok ? refreshMs : retryMs);
-    Serial.printf("[%s] %s\n", name, ok ? "atualizado" : "falhou");
+    Serial.printf("[%s] %s\n", name, ok ? "updated" : "failed");
   }
 };
 
@@ -409,8 +409,8 @@ struct CryptoData : FeedData {
   }
 };
 
-Feed<WeatherData> weatherFeed("meteo",  WEATHER_REFRESH_MS, 30000, WEATHER_EXPIRE_MS);
-Feed<CryptoData>  cryptoFeed ("cripto", CRYPTO_REFRESH_MS,  60000, CRYPTO_EXPIRE_MS);
+Feed<WeatherData> weatherFeed("weather", WEATHER_REFRESH_MS, 30000, WEATHER_EXPIRE_MS);
+Feed<CryptoData>  cryptoFeed ("crypto",  CRYPTO_REFRESH_MS,  60000, CRYPTO_EXPIRE_MS);
 
 // feeds are fetched one at a time (a single TLS connection at once keeps RAM use low)
 void netTask(void*) {
@@ -558,22 +558,22 @@ uint8_t wxKind(int code) {
 
 const char* wxLabel(int code) {
   switch (code) {
-    case 0:  return "CÉU LIMPO";
-    case 1:  return "CÉU POUCO NUBLADO";
-    case 2:  return "PARCIALMENTE NUBLADO";
-    case 3:  return "ENCOBERTO";
-    case 45: case 48: return "NEVOEIRO";
-    case 51: case 53: case 55: return "CHUVISCO";
-    case 56: case 57: return "CHUVISCO GELADO";
-    case 61: return "CHUVA FRACA";
-    case 63: return "CHUVA";
-    case 65: return "CHUVA FORTE";
-    case 66: case 67: return "CHUVA GELADA";
-    case 71: case 73: case 75: case 77: return "NEVE";
-    case 80: case 81: case 82: return "AGUACEIROS";
-    case 85: case 86: return "AGUACEIROS DE NEVE";
-    case 95: return "TROVOADA";
-    case 96: case 99: return "TROVOADA C/ GRANIZO";
+    case 0:  return "CLEAR SKY";
+    case 1:  return "MAINLY CLEAR";
+    case 2:  return "PARTLY CLOUDY";
+    case 3:  return "OVERCAST";
+    case 45: case 48: return "FOG";
+    case 51: case 53: case 55: return "DRIZZLE";
+    case 56: case 57: return "FREEZING DRIZZLE";
+    case 61: return "LIGHT RAIN";
+    case 63: return "RAIN";
+    case 65: return "HEAVY RAIN";
+    case 66: case 67: return "FREEZING RAIN";
+    case 71: case 73: case 75: case 77: return "SNOW";
+    case 80: case 81: case 82: return "SHOWERS";
+    case 85: case 86: return "SNOW SHOWERS";
+    case 95: return "THUNDERSTORM";
+    case 96: case 99: return "STORM WITH HAIL";
   }
   return "--";
 }
@@ -739,13 +739,13 @@ struct DashboardPage : Page {
       drawCentered(g, buf, 50, 1, C_DIM);
     } else {
       drawCentered(g, "--:--", 8, 4, C_DIM);
-      drawCentered(g, wifi ? "a acertar a hora..." : "a ligar ao wi-fi...", 50, 1, C_DIM);
+      drawCentered(g, wifi ? "syncing time..." : "connecting wi-fi...", 50, 1, C_DIM);
     }
 
     // ---- weather ----
     WeatherData w = weatherFeed.get();
     if (!w.valid) {
-      drawCentered(g, !wifi ? "sem wi-fi" : weatherFeed.lastFailed ? "meteo indisponível" : "a carregar meteo...", 96, 1, C_DIM);
+      drawCentered(g, !wifi ? "no wi-fi" : weatherFeed.lastFailed ? "weather unavailable" : "loading weather...", 96, 1, C_DIM);
       return;
     }
     uint32_t age = millis() - w.fetchedAt;
@@ -768,8 +768,8 @@ struct DashboardPage : Page {
 
     if (age > WEATHER_STALE_MS) {          // refresh is failing: say how old the data is
       unsigned long mins = age / 60000UL;
-      if (mins < 60) snprintf(buf, sizeof buf, "atualizado há %lu min", mins);
-      else           snprintf(buf, sizeof buf, "atualizado há %lu h", mins / 60);
+      if (mins < 60) snprintf(buf, sizeof buf, "updated %lu min ago", mins);
+      else           snprintf(buf, sizeof buf, "updated %lu h ago", mins / 60);
       drawCentered(g, buf, 115, 1, C_BAD);
     } else {                               // \x18 / \x19 = up / down arrows in the GFX font
       snprintf(buf, sizeof buf, "\x18%d \x19%d  %d%%  %dkm/h", w.dMax[0], w.dMin[0], w.humidity, (int)lroundf(w.wind));
@@ -796,13 +796,13 @@ struct CalendarPage : Page {
   void action(bool right) override { dayOffset += right ? 1 : -1; }
 
   void draw(GFXcanvas16& g, uint32_t now) override {
-    static const char WDAYS[] = "STQQSSD";   // Monday-first
+    static const char WDAYS[] = "MTWTFSS";   // Monday-first
     const uint16_t C_WEEKEND = RGB(150, 95, 95);
     const int16_t  X0 = 16, CELL = 16, Y0 = 36;
 
     struct tm today;
     if (!getLocalTime(&today, 0)) {
-      drawCentered(g, "a acertar a hora...", 74, 1, C_DIM);
+      drawCentered(g, "syncing time...", 74, 1, C_DIM);
       return;
     }
 
@@ -828,7 +828,7 @@ struct CalendarPage : Page {
     int rows     = (lead + days + 6) / 7;
     bool thisMonth = sel.tm_year == today.tm_year && sel.tm_mon == today.tm_mon;
 
-    // header: "NOVEMBRO 2026"
+    // header: "NOVEMBER 2026"
     char buf[24];
     snprintf(buf, sizeof buf, " %d", year);
     int16_t wm = textWidth(MONTHS_FULL[mon], 1);
@@ -882,7 +882,7 @@ struct CalendarPage : Page {
 
 struct SystemPage : Page {
   void draw(GFXcanvas16& g, uint32_t now) override {
-    drawCentered(g, "SISTEMA", 12, 2, C_ACCENT);
+    drawCentered(g, "SYSTEM", 12, 2, C_ACCENT);
 
     bool wifi = WiFi.status() == WL_CONNECTED;
     char buf[32];
@@ -893,14 +893,14 @@ struct SystemPage : Page {
       y += 16;
     };
 
-    row("Wi-Fi", wifi ? WiFi.SSID().c_str() : "desligado");
+    row("Wi-Fi", wifi ? WiFi.SSID().c_str() : "offline");
     row("IP",    wifi ? WiFi.localIP().toString().c_str() : "-");
     snprintf(buf, sizeof buf, "%d dBm", WiFi.RSSI());
-    row("Sinal", wifi ? buf : "-");
+    row("RSSI", wifi ? buf : "-");
     uint32_t s = now / 1000;
     snprintf(buf, sizeof buf, "%luh %02lum %02lus",
              (unsigned long)(s / 3600), (unsigned long)(s / 60 % 60), (unsigned long)(s % 60));
-    row("Ativo", buf);
+    row("Up", buf);
     snprintf(buf, sizeof buf, "%lu KB", (unsigned long)(ESP.getFreeHeap() / 1024));
     row("Mem.", buf);
     // which paths the PC bridge is reaching the board through
@@ -925,22 +925,22 @@ void drawRight(GFXcanvas16& g, const char* s, int16_t xRight, int16_t y, uint8_t
 // sun path for today (sunrise -> sunset) + UV index
 struct SunPage : Page {
   static const char* uvLabel(float uv) {
-    return uv < 3 ? "BAIXO" : uv < 6 ? "MODERADO" : uv < 8 ? "ALTO" : uv < 11 ? "MUITO ALTO" : "EXTREMO";
+    return uv < 3 ? "LOW" : uv < 6 ? "MODERATE" : uv < 8 ? "HIGH" : uv < 11 ? "VERY HIGH" : "EXTREME";
   }
   static uint16_t uvColor(float uv) {
     return uv < 3 ? C_OK : uv < 6 ? C_ACCENT : uv < 8 ? RGB(255, 130, 30) : uv < 11 ? C_BAD : RGB(190, 90, 255);
   }
 
   void draw(GFXcanvas16& g, uint32_t now) override {
-    drawCentered(g, "SOL", 6, 1, C_ACCENT);
+    drawCentered(g, "SUN", 6, 1, C_ACCENT);
 
     WeatherData w = weatherFeed.get();
     struct tm t;
     bool haveTime = getLocalTime(&t, 0);
     if (!w.valid || !haveTime || w.sunrise[0] < 0 || w.sunset[0] <= w.sunrise[0]) {
       bool wifi = WiFi.status() == WL_CONNECTED;
-      drawCentered(g, !wifi ? "sem wi-fi" : !haveTime ? "a acertar a hora..." :
-                      weatherFeed.lastFailed ? "meteo indisponível" : "a carregar meteo...", 74, 1, C_DIM);
+      drawCentered(g, !wifi ? "no wi-fi" : !haveTime ? "syncing time..." :
+                      weatherFeed.lastFailed ? "weather unavailable" : "loading weather...", 74, 1, C_DIM);
       return;
     }
 
@@ -979,8 +979,8 @@ struct SunPage : Page {
     snprintf(buf, sizeof buf, "%dh%02d", (set - rise) / 60, (set - rise) % 60);
     drawCentered(g, buf, CY + 6, 1, C_DIM);
 
-    if (left >= 60) snprintf(buf, sizeof buf, "%s em %dh %02dm", day ? "pôr do sol" : "nasce", left / 60, left % 60);
-    else            snprintf(buf, sizeof buf, "%s em %dm", day ? "pôr do sol" : "nasce", left < 1 ? 1 : left);
+    if (left >= 60) snprintf(buf, sizeof buf, "%s in %dh %02dm", day ? "sunset" : "sunrise", left / 60, left % 60);
+    else            snprintf(buf, sizeof buf, "%s in %dm", day ? "sunset" : "sunrise", left < 1 ? 1 : left);
     drawCentered(g, buf, CY + 19, 1, C_ACCENT);
 
     // ---- UV ----
@@ -990,7 +990,7 @@ struct SunPage : Page {
     snprintf(buf, sizeof buf, "%d", (int)lroundf(w.uv));
     drawText(g, buf, 6, 126, 2, C_TEXT);
     drawRight(g, uvLabel(w.uv), SCR_W - 6, 118, 1, color);
-    snprintf(buf, sizeof buf, "máx. hoje %d", (int)lroundf(w.uvMax));
+    snprintf(buf, sizeof buf, "max today %d", (int)lroundf(w.uvMax));
     drawRight(g, buf, SCR_W - 6, 130, 1, C_DIM);
 
     // scale 0-11, tick marks today's maximum
@@ -1014,12 +1014,12 @@ struct CryptoPage : Page {
   }
 
   void draw(GFXcanvas16& g, uint32_t now) override {
-    drawCentered(g, "CRIPTO", 6, 1, C_ACCENT);
+    drawCentered(g, "CRYPTO", 6, 1, C_ACCENT);
 
     CryptoData c = cryptoFeed.get();
     if (!c.valid) {
       bool wifi = WiFi.status() == WL_CONNECTED;
-      drawCentered(g, !wifi ? "sem wi-fi" : cryptoFeed.lastFailed ? "sem dados" : "a carregar...", 74, 1, C_DIM);
+      drawCentered(g, !wifi ? "no wi-fi" : cryptoFeed.lastFailed ? "no data" : "loading...", 74, 1, C_DIM);
       return;
     }
     bool stale = millis() - c.fetchedAt > CRYPTO_STALE_MS;   // refresh failing: grey out
@@ -1048,10 +1048,10 @@ struct PcPage : Page {
 
     if (!pc.live()) {
       if (pc.linked()) {   // the bridge is talking but has no hardware stats
-        drawCentered(g, "sem dados de hardware", 68, 1, C_DIM);
-        drawCentered(g, "(LHM a correr?)", 80, 1, C_FAINT);
+        drawCentered(g, "no hardware data", 68, 1, C_DIM);
+        drawCentered(g, "(LHM running?)", 80, 1, C_FAINT);
       } else {
-        drawCentered(g, "sem ligação ao PC", 68, 1, C_DIM);
+        drawCentered(g, "no PC connection", 68, 1, C_DIM);
         drawCentered(g, "(painel_bridge?)", 80, 1, C_FAINT);
       }
       return;
@@ -1096,10 +1096,10 @@ struct PcPage : Page {
 struct UsagePage : Page {
   // 2d 4h / 2h 13m / 13m
   static void formatLeft(char* out, size_t n, long s) {
-    if (s >= 86400)     snprintf(out, n, "repõe em %ldd %ldh", s / 86400, s % 86400 / 3600);
-    else if (s >= 3600) snprintf(out, n, "repõe em %ldh %02ldm", s / 3600, s % 3600 / 60);
-    else if (s > 0)     snprintf(out, n, "repõe em %ldm", (s + 59) / 60);
-    else                snprintf(out, n, "a repor...");
+    if (s >= 86400)     snprintf(out, n, "resets in%ldd %ldh", s / 86400, s % 86400 / 3600);
+    else if (s >= 3600) snprintf(out, n, "resets in%ldh %02ldm", s / 3600, s % 3600 / 60);
+    else if (s > 0)     snprintf(out, n, "resets in%ldm", (s + 59) / 60);
+    else                snprintf(out, n, "resetting...");
   }
 
   void meter(GFXcanvas16& g, int16_t y, const char* label, float pct, int32_t resetIn, uint32_t ageS) {
@@ -1118,10 +1118,10 @@ struct UsagePage : Page {
     drawText(g, name, 6, y, 1, C_ACCENT);
     if (!u.live()) {
       if (pc.linked()) {   // the bridge is talking, so it could not get this one's usage
-        drawText(g, "sem dados", 6, y + 16, 1, C_DIM);
-        drawText(g, "(ver janela bridge)", 6, y + 27, 1, C_FAINT);
+        drawText(g, "no data", 6, y + 16, 1, C_DIM);
+        drawText(g, "(see bridge window)", 6, y + 27, 1, C_FAINT);
       } else {
-        drawText(g, "sem ligação ao PC", 6, y + 16, 1, C_DIM);
+        drawText(g, "no PC connection", 6, y + 16, 1, C_DIM);
         drawText(g, "(painel_bridge?)", 6, y + 27, 1, C_FAINT);
       }
       return;
@@ -1132,7 +1132,7 @@ struct UsagePage : Page {
   }
 
   void draw(GFXcanvas16& g, uint32_t now) override {
-    drawCentered(g, "USO DE IA", 6, 1, C_DIM);
+    drawCentered(g, "AI USAGE", 6, 1, C_DIM);
     section(g, 22, "CLAUDE", claudeUsage);
     g.drawFastHLine(6, 82, SCR_W - 12, C_FAINT);
     section(g, 90, "CODEX", codexUsage);
@@ -1180,7 +1180,7 @@ void setup() {
   tft.fillScreen(C_BG);
 
   if (!fb.getBuffer()) {
-    Serial.println("falha ao alocar o framebuffer");
+    Serial.println("failed to allocate the framebuffer");
     while (true) delay(1000);
   }
   fb.setTextWrap(false);

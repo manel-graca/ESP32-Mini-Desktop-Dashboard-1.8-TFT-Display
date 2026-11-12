@@ -1,16 +1,16 @@
 # ESP32 Mini Desktop Dashboard
 
-A small desktop dashboard for an ESP32 with a 1.8" ST7735 TFT (128x160), two buttons and an RGB LED. The interface is in Portuguese (pt-PT).
+A small desktop dashboard for an ESP32 with a 1.8" ST7735 TFT (128x160), two buttons and an RGB LED.
 
 ## Pages
 
 - **Dashboard** – clock, date, current weather and 3-day forecast
-- **Sol** – sunrise / sunset arc and UV index
-- **Calendário** – month view with Portuguese public holidays
-- **Cripto** – BTC, ETH and SOL prices in EUR
+- **Sun** – sunrise / sunset arc and UV index
+- **Calendar** – month view with Portuguese public holidays
+- **Crypto** – BTC, ETH and SOL prices in EUR
 - **PC** – CPU, GPU and RAM usage with a load graph
-- **Uso de IA** – Claude and Codex usage limits
-- **Sistema** – Wi-Fi, IP, uptime and memory
+- **AI Usage** – Claude and Codex usage limits
+- **System** – Wi-Fi, IP, uptime and memory
 
 Hold a button to change page, click to interact with the current page.
 

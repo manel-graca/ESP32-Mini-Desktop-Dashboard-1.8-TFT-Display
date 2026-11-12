@@ -3,70 +3,70 @@
   "country": "PT",
   "holidays": [
     {
-      "name": "Ano Novo",
+      "name": "New Year's Day",
       "date": "01-01",
       "type": "fixed"
     },
     {
-      "name": "Sexta-feira Santa",
+      "name": "Good Friday",
       "date": null,
       "type": "movable",
       "easterOffsetDays": -2
     },
     {
-      "name": "Domingo de Páscoa",
+      "name": "Easter Sunday",
       "date": null,
       "type": "movable",
       "easterOffsetDays": 0
     },
     {
-      "name": "Dia da Liberdade",
+      "name": "Freedom Day",
       "date": "04-25",
       "type": "fixed"
     },
     {
-      "name": "Dia do Trabalhador",
+      "name": "Labour Day",
       "date": "05-01",
       "type": "fixed"
     },
     {
-      "name": "Corpo de Deus",
+      "name": "Corpus Christi",
       "date": null,
       "type": "movable",
       "easterOffsetDays": 60
     },
     {
-      "name": "Dia de Portugal",
+      "name": "Portugal Day",
       "date": "06-10",
       "type": "fixed"
     },
     {
-      "name": "Assunção de Nossa Senhora",
+      "name": "Assumption of Mary",
       "date": "08-15",
       "type": "fixed"
     },
     {
-      "name": "Implantação da República",
+      "name": "Republic Day",
       "date": "10-05",
       "type": "fixed"
     },
     {
-      "name": "Dia de Todos os Santos",
+      "name": "All Saints' Day",
       "date": "11-01",
       "type": "fixed"
     },
     {
-      "name": "Restauração da Independência",
+      "name": "Restoration of Independence",
       "date": "12-01",
       "type": "fixed"
     },
     {
-      "name": "Imaculada Conceição",
+      "name": "Immaculate Conception",
       "date": "12-08",
       "type": "fixed"
     },
     {
-      "name": "Natal",
+      "name": "Christmas Day",
       "date": "12-25",
       "type": "fixed"
     }
